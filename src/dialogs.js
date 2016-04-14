@@ -7,7 +7,7 @@ export default {
   about: () => {
     dialog.showErrorBox(
       `Electron Inbox version ${packageJSON.version}`,
-      `Google Inbox Wrapped in Electron by ${packageJSON.author}\n\n${packageJSON.homepage}`
+      `Google Inbox wrapped in Electron by ${packageJSON.author}\n\n${packageJSON.homepage}`
     )
   }
 }

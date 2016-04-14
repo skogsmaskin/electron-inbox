@@ -23,7 +23,7 @@
     "application"
   ],
   "author": "skogsmaskin",
-  "license": "CC0-1.0",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/skogsmaskin/electron-inbox/issues"
   },

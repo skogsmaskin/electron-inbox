@@ -1,7 +1,25 @@
 import dialogs from './dialogs'
-import shortcuts from './shortcuts'
+import commands from './commands'
 
-export default (app, window, platform) => {
+export default (app, mainWindow, windowList, platform) => {
+  const activeWindow = windowList.find(winObj => winObj.active)
+  //
+  // let composeAction = []
+  // if (activeWindow) {
+  //   composeAction = [{label: 'Compose', accelerator: 'CmdOrCtrl+N', click: () => shortcuts.compose(activeWindow.window)}]
+  // }
+
+  const windowListItems = windowList.map((winObj, index) => {
+    const label = `${index + 1}. ${winObj.title}`
+    return {
+      label: label,
+      type: 'checkbox',
+      checked: winObj.window.isFocused(),
+      accelerator: `CmdOrCtrl+${index + 1}`,
+      click: () => winObj.window.focus()
+    }
+  })
+
   const common = [
     {
       label: 'Application',
@@ -11,12 +29,11 @@ export default (app, window, platform) => {
         {label: 'Quit', accelerator: 'Command+Q', click: () => app.quit()}
       ]
     },
-    {
-      label: 'File',
-      submenu: [
-        {label: 'Compose', accelerator: 'CmdOrCtrl+N', click: () => shortcuts.compose(window)}
-      ]
-    },
+    // {
+    //   label: 'File',
+    //   submenu: [
+    //   ].concat(composeAction)
+    // },
     {
       label: 'Edit',
       submenu: [
@@ -32,8 +49,18 @@ export default (app, window, platform) => {
     {
       label: 'Window',
       submenu: [
-        {label: 'Minimize', accelerator: 'CmdOrCtrl+M', selector: 'minimize:'},
-        {label: 'Hide', accelerator: 'CmdOrCtrl+H', selector: 'hide:'}
+        {label: 'Minimize', accelerator: 'CmdOrCtrl+M', selector: 'performMiniaturize:'},
+        {label: 'Hide', accelerator: 'CmdOrCtrl+H', selector: 'hide:'},
+        {label: 'Close', accelerator: 'CmdOrCtrl+W', selector: 'performClose:'},
+        {type: 'separator'},
+        {label: 'Bring All to Front', selector: 'arrangeInFront:'},
+        {type: 'separator'},
+      ].concat(windowListItems)
+    },
+    {
+      label: 'Help',
+      submenu: [
+        {label: 'Show keyboard shortcuts', click: () => commands.showShortcuts(activeWindow.window)}
       ]
     }
   ]

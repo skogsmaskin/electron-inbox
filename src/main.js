@@ -9,7 +9,8 @@ const BrowserWindow = electron.BrowserWindow
 
 const windowOptions = {
   width: 1920,
-  height: 1080
+  height: 1080,
+  title: 'Inbox'
 }
 
 const ownedHosts = [
@@ -17,9 +18,20 @@ const ownedHosts = [
   'accounts.google.com'
 ]
 
+const windowList = []
+
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow
+
+
+function updateMenu() {
+  Menu.setApplicationMenu(
+    Menu.buildFromTemplate(
+      menuTemplate(app, mainWindow, windowList, process.platform)
+    )
+  )
+}
 
 function createWindow() {
   mainWindow = new BrowserWindow(windowOptions)
@@ -47,6 +59,8 @@ function createWindow() {
     }
   }
 
+  // mainWindow.webContents.openDevTools()
+
   webContents.on('will-navigate', handleRedirect)
   webContents.on('new-window', handleRedirect)
 
@@ -58,16 +72,47 @@ function createWindow() {
     // when you should delete the corresponding element.
     mainWindow = null
   })
-
-
-  Menu.setApplicationMenu(Menu.buildFromTemplate(menuTemplate(app, mainWindow, process.platform)))
-
-
 }
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 app.on('ready', createWindow)
+
+// setInterval(() => {
+//   console.log(windowList)
+// }, 1000)
+
+// Keep track of windows
+app.on('browser-window-created', (event, window) => {
+  const windowObject = {window: window, title: window.getTitle(), active: true}
+  function setActive() {
+    windowList.forEach(winObj => {
+      winObj.active = false
+    })
+    windowObject.active = true
+  }
+  setActive()
+  if (windowList.map(win => win.window).indexOf(window) === -1) {
+    windowList.push(windowObject)
+    const webContents = window.webContents
+    const updateWindowName = () => {
+      windowObject.title = webContents.getTitle()
+      window.focus()
+      updateMenu()
+    }
+    const removeFromWindowList = () => {
+      windowList.splice(windowList.indexOf(windowObject), 1)
+      updateMenu()
+    }
+    window.on('close', removeFromWindowList)
+    window.on('focus', () => {
+      setActive()
+      updateMenu()
+    })
+    webContents.on('dom-ready', updateWindowName)
+  }
+  updateMenu()
+})
 
 // Quit when all windows are closed.
 app.on('window-all-closed', () => {
