@@ -20,7 +20,7 @@ const template = [{
  submenu: [
      { label: "About Application", selector: "orderFrontStandardAboutPanel:" },
      { type: "separator" },
-     { label: "Quit", accelerator: "Command+Q", click: function() { app.quit(); }}
+     { label: "Quit", accelerator: "Command+Q", click: function() { app.quit() }}
  ]}, {
  label: "Edit",
  submenu: [
@@ -36,7 +36,7 @@ const template = [{
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
-let mainWindow;
+let mainWindow
 
 function createWindow () {
   mainWindow = new BrowserWindow(windowOptions)

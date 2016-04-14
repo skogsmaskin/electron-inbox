@@ -1,7 +1,7 @@
 # Google Inbox as an application
 
 ```
-npm install && npm pack-osx
+npm install && npm run pack-osx
 ```
 
 Inbox is now available in ./Inbox-darwin-x64
