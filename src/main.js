@@ -1,9 +1,11 @@
-const electron = require('electron')
+import electron from 'electron' // eslint-disable-line import/no-unresolved
+import Menu from 'menu' // eslint-disable-line import/no-unresolved
+import childProcess from 'child_process'
+import URL from 'url'
+import menuTemplate from './menu-template'
+
 const app = electron.app
 const BrowserWindow = electron.BrowserWindow
-const child_process = require('child_process')
-const URL = require('url')
-const Menu = require("menu")
 
 const windowOptions = {
   width: 1920,
@@ -15,43 +17,33 @@ const ownedHosts = [
   'accounts.google.com'
 ]
 
-const template = [{
- label: "Application",
- submenu: [
-     { label: "About Application", selector: "orderFrontStandardAboutPanel:" },
-     { type: "separator" },
-     { label: "Quit", accelerator: "Command+Q", click: function() { app.quit() }}
- ]}, {
- label: "Edit",
- submenu: [
-     { label: "Undo", accelerator: "CmdOrCtrl+Z", selector: "undo:" },
-     { label: "Redo", accelerator: "Shift+CmdOrCtrl+Z", selector: "redo:" },
-     { type: "separator" },
-     { label: "Cut", accelerator: "CmdOrCtrl+X", selector: "cut:" },
-     { label: "Copy", accelerator: "CmdOrCtrl+C", selector: "copy:" },
-     { label: "Paste", accelerator: "CmdOrCtrl+V", selector: "paste:" },
-     { label: "Select All", accelerator: "CmdOrCtrl+A", selector: "selectAll:" }
- ]}
-]
-
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow
 
-function createWindow () {
+function createWindow() {
   mainWindow = new BrowserWindow(windowOptions)
   mainWindow.loadURL('https://inbox.google.com')
 
   const webContents = mainWindow.webContents
 
-  var handleRedirect = (e, url) => {
+  const handleRedirect = (event, url) => {
     const host = URL.parse(url).host
-    if(ownedHosts.indexOf(host) === -1) {
-      e.preventDefault()
-      // TODO: support Linux and Windows here
-      // Linux: xdg-open
-      // Windows: ??
-      child_process.execSync(`open ${url}]`)
+    if (ownedHosts.indexOf(host) === -1) {
+      event.preventDefault()
+      switch (process.platform) {
+        case 'darwin':
+          childProcess.exec(`open "${url}"`)
+          break
+        case 'linux':
+          childProcess.exec(`xdg-open "${url}"`)
+          break
+        case 'win32':
+          childProcess.exec(`start "${url}"`)
+          break
+        default:
+          // None
+      }
     }
   }
 
@@ -60,7 +52,7 @@ function createWindow () {
 
 
   // Emitted when the window is closed.
-  mainWindow.on('closed', function() {
+  mainWindow.on('closed', () => {
     // Dereference the window object, usually you would store windows
     // in an array if your app supports multi windows, this is the time
     // when you should delete the corresponding element.
@@ -68,7 +60,7 @@ function createWindow () {
   })
 
 
-  Menu.setApplicationMenu(Menu.buildFromTemplate(template))
+  Menu.setApplicationMenu(Menu.buildFromTemplate(menuTemplate(app, mainWindow, process.platform)))
 
 
 }
@@ -78,7 +70,7 @@ function createWindow () {
 app.on('ready', createWindow)
 
 // Quit when all windows are closed.
-app.on('window-all-closed', function () {
+app.on('window-all-closed', () => {
   // On OS X it is common for applications and their menu bar
   // to stay active until the user quits explicitly with Cmd + Q
   if (process.platform !== 'darwin') {
@@ -86,7 +78,7 @@ app.on('window-all-closed', function () {
   }
 })
 
-app.on('activate', function () {
+app.on('activate', () => {
   // On OS X it's common to re-create a window in the app when the
   // dock icon is clicked and there are no other windows open.
   if (mainWindow === null) {
