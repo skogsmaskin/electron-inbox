@@ -7,7 +7,7 @@
     "start": "electron .",
     "pack-osx": "electron-packager . Inbox --platform=darwin --arch=x64 --icon=./assets/inbox.icns --overwrite",
     "install-osx": "npm run pack-osx && cp -rf ./Inbox-darwin-x64/Inbox.app /Applications",
-    "lint": "eslint main.js",
+    "lint": "eslint src",
     "pre-commit-lint": "(npm run lint -- --quiet || (echo 'Warning: project has lint errors. Please fix and re-commit with `git commit --amend`' && echo ''))"
   },
   "pre-commit": [
